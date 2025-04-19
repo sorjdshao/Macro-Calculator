@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>PFCバランス計算機 - 多言語対応</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: sans-serif; background: #f5f5f5; padding: 20px; }
+    .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    input, select, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 1em; }
+    button { background: #4CAF50; color: white; border: none; border-radius: 5px; }
+    .result { background: #eaffea; border-left: 5px solid #4CAF50; padding: 15px; margin-top: 20px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <label for="language"><strong>Language / 言語:</strong></label>
+    <select id="language" onchange="changeLanguage()">
+      <option value="ja">日本語</option>
+      <option value="en">English</option>
+    </select><br><br>
+
+    <h1 id="title">PFCバランス計算機</h1>
+
+    <label id="label-total">総摂取カロリー（kcal）</label>
+    <input type="number" id="totalCal" placeholder="例: 2000">
+
+    <label id="label-protein">タンパク質の割合（%）</label>
+    <input type="number" id="protein" placeholder="例: 30">
+
+    <label id="label-fat">脂質の割合（%）</label>
+    <input type="number" id="fat" placeholder="例: 20">
+
+    <label id="label-carb">炭水化物の割合（%）</label>
+    <input type="number" id="carb" placeholder="例: 50">
+
+    <button id="calcBtn" onclick="calculate()">計算する</button>
+
+    <div class="result" id="result" style="display:none;"></div>
+  </div>
+
+<script>
+const texts = {
+  ja: {
+    title: "PFCバランス計算機",
+    label_total: "総摂取カロリー（kcal）",
+    label_protein: "タンパク質の割合（%）",
+    label_fat: "脂質の割合（%）",
+    label_carb: "炭水化物の割合（%）",
+    button: "計算する",
+    result: {
+      protein: "タンパク質",
+      fat: "脂質",
+      carb: "炭水化物"
+    },
+    alert: "すべての値を正しく入力してください"
+  },
+  en: {
+    title: "PFC Macro Calculator",
+    label_total: "Total Calorie Intake (kcal)",
+    label_protein: "Protein Ratio (%)",
+    label_fat: "Fat Ratio (%)",
+    label_carb: "Carbohydrate Ratio (%)",
+    button: "Calculate",
+    result: {
+      protein: "Protein",
+      fat: "Fat",
+      carb: "Carbohydrates"
+    },
+    alert: "Please enter all values correctly"
+  }
+};
+
+function changeLanguage() {
+  const lang = document.getElementById("language").value;
+  document.documentElement.lang = lang;
+  document.getElementById("title").textContent = texts[lang].title;
+  document.getElementById("label-total").textContent = texts[lang].label_total;
+  document.getElementById("label-protein").textContent = texts[lang].label_protein;
+  document.getElementById("label-fat").textContent = texts[lang].label_fat;
+  document.getElementById("label-carb").textContent = texts[lang].label_carb;
+  document.getElementById("calcBtn").textContent = texts[lang].button;
+}
+
+function calculate() {
+  const lang = document.getElementById("language").value;
+  const totalCal = parseFloat(document.getElementById("totalCal").value);
+  const proteinRatio = parseFloat(document.getElementById("protein").value);
+  const fatRatio = parseFloat(document.getElementById("fat").value);
+  const carbRatio = parseFloat(document.getElementById("carb").value);
+
+  if (isNaN(totalCal) || isNaN(proteinRatio) || isNaN(fatRatio) || isNaN(carbRatio)) {
+    alert(texts[lang].alert);
+    return;
+  }
+
+  const pCal = totalCal * (proteinRatio / 100);
+  const fCal = totalCal * (fatRatio / 100);
+  const cCal = totalCal * (carbRatio / 100);
+
+  const result = document.getElementById("result");
+  result.innerHTML = `
+    <p><strong>${texts[lang].result.protein}:</strong> ${Math.round(pCal / 4)} g (${Math.round(pCal)} kcal)</p>
+    <p><strong>${texts[lang].result.fat}:</strong> ${Math.round(fCal / 9)} g (${Math.round(fCal)} kcal)</p>
+    <p><strong>${texts[lang].result.carb}:</strong> ${Math.round(cCal / 4)} g (${Math.round(cCal)} kcal)</p>
+  `;
+  result.style.display = "block";
+}
+
+window.onload = changeLanguage;
+</script>
+</body>
+</html>

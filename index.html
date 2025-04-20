@@ -8,7 +8,7 @@
     body { font-family: sans-serif; background: #f5f5f5; padding: 20px; }
     .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
     input, select, button { width: 100%; padding: 10px; margin: 10px 0; font-size: 1em; }
-    button { background: #4CAF50; color: white; border: none; border-radius: 5px; }
+    button { background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
     .result { background: #eaffea; border-left: 5px solid #4CAF50; padding: 15px; margin-top: 20px; border-radius: 5px; }
   </style>
 </head>
@@ -45,9 +45,13 @@
     </select>
 
     <button id="calcBtn" onclick="calculate()">計算する</button>
+    <button onclick="downloadPDF()">PDFとして保存</button>
 
     <div class="result" id="result" style="display:none;"></div>
   </div>
+
+  <!-- PDF出力ライブラリ -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
 const texts = {
@@ -64,7 +68,8 @@ const texts = {
       fat: "脂質",
       carb: "炭水化物"
     },
-    alert: "すべての値を正しく入力してください"
+    alert: "すべての値を正しく入力してください",
+    downloadAlert: "先に計算を行ってください"
   },
   en: {
     title: "PFC Macro Calculator",
@@ -79,7 +84,8 @@ const texts = {
       fat: "Fat",
       carb: "Carbohydrates"
     },
-    alert: "Please enter all values correctly"
+    alert: "Please enter all values correctly",
+    downloadAlert: "Please calculate first before downloading"
   }
 };
 
@@ -128,13 +134,31 @@ function calculate() {
     <p><strong>${texts[lang].result.fat}:</strong> ${fGram} g (${Math.round(fCal)} kcal)</p>
     <p><strong>${texts[lang].result.carb}:</strong> ${cGram} g (${Math.round(cCal)} kcal)</p>
     <hr>
-    <p><strong>${meals} ${lang === 'ja' ? "1回あたりの食事" : "meals per day (per meal)"}:</strong></p>
+    <p><strong>${meals} ${lang === 'ja' ? "回の食事の場合（1回あたり）" : "meals per day (per meal)"}:</strong></p>
     <p>${texts[lang].result.protein}: ${pPerMeal} g</p>
     <p>${texts[lang].result.fat}: ${fPerMeal} g</p>
     <p>${texts[lang].result.carb}: ${cPerMeal} g</p>
     <p>${lang === 'ja' ? "合計" : "Total"}: ${calPerMeal} kcal</p>
   `;
   result.style.display = "block";
+}
+
+function downloadPDF() {
+  const lang = document.getElementById("language").value;
+  const result = document.getElementById("result");
+  if (result.style.display === "none") {
+    alert(texts[lang].downloadAlert);
+    return;
+  }
+
+  const opt = {
+    margin: 0.5,
+    filename: lang === 'ja' ? 'PFC計算結果.pdf' : 'PFC_Macro_Result.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opt).from(result).save();
 }
 
 window.onload = changeLanguage;

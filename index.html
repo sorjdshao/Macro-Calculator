@@ -13,7 +13,7 @@
   </style>
 </head>
 <body>
-  <div class="container" id="pdfArea">
+  <div class="container">
     <label for="language"><strong>Language / 言語:</strong></label>
     <select id="language" onchange="changeLanguage()">
       <option value="ja">日本語</option>
@@ -53,7 +53,7 @@
   <!-- PDF出力ライブラリ -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
-<script>
+  <script>
 const texts = {
   ja: {
     title: "PFCバランス計算機",
@@ -145,20 +145,47 @@ function calculate() {
 
 function downloadPDF() {
   const lang = document.getElementById("language").value;
-  const area = document.getElementById("pdfArea");
+  const result = document.getElementById("result");
+
+  if (result.style.display === "none") {
+    alert(texts[lang].downloadAlert);
+    return;
+  }
+
+  // クローン作成と整形
+  const clone = result.cloneNode(true);
+  clone.style.display = "block";
+  clone.style.background = "#ffffff";
+  clone.style.color = "#000000";
+  clone.style.padding = "20px";
+  clone.style.width = "100%";
+  clone.style.fontSize = "16px";
+  clone.style.lineHeight = "1.5";
+  clone.style.border = "none";
+
+  const tempDiv = document.createElement("div");
+  tempDiv.style.position = "fixed";
+  tempDiv.style.top = "0";
+  tempDiv.style.left = "0";
+  tempDiv.style.width = "100%";
+  tempDiv.style.zIndex = "9999";
+  tempDiv.appendChild(clone);
+  document.body.appendChild(tempDiv);
 
   const opt = {
     margin: 0.3,
     filename: lang === 'ja' ? 'PFC計算結果.pdf' : 'PFC_Macro_Result.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
+    image: { type: 'jpeg', quality: 1 },
     html2canvas: { scale: 3, useCORS: true },
     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
   };
 
-  html2pdf().set(opt).from(area).save();
+  html2pdf().set(opt).from(tempDiv).save().then(() => {
+    document.body.removeChild(tempDiv);
+  });
 }
 
 window.onload = changeLanguage;
-</script>
+  </script>
 </body>
 </html>

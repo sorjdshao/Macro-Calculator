@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -35,6 +34,16 @@
     <label id="label-carb">炭水化物の割合（%）</label>
     <input type="number" id="carb" placeholder="例: 50">
 
+    <label id="label-meals">1日の食事回数</label>
+    <select id="meals">
+      <option value="1">1回</option>
+      <option value="2">2回</option>
+      <option value="3" selected>3回</option>
+      <option value="4">4回</option>
+      <option value="5">5回</option>
+      <option value="6">6回</option>
+    </select>
+
     <button id="calcBtn" onclick="calculate()">計算する</button>
 
     <div class="result" id="result" style="display:none;"></div>
@@ -48,6 +57,7 @@ const texts = {
     label_protein: "タンパク質の割合（%）",
     label_fat: "脂質の割合（%）",
     label_carb: "炭水化物の割合（%）",
+    label_meals: "1日の食事回数",
     button: "計算する",
     result: {
       protein: "タンパク質",
@@ -62,6 +72,7 @@ const texts = {
     label_protein: "Protein Ratio (%)",
     label_fat: "Fat Ratio (%)",
     label_carb: "Carbohydrate Ratio (%)",
+    label_meals: "Number of meals per day",
     button: "Calculate",
     result: {
       protein: "Protein",
@@ -80,6 +91,7 @@ function changeLanguage() {
   document.getElementById("label-protein").textContent = texts[lang].label_protein;
   document.getElementById("label-fat").textContent = texts[lang].label_fat;
   document.getElementById("label-carb").textContent = texts[lang].label_carb;
+  document.getElementById("label-meals").textContent = texts[lang].label_meals;
   document.getElementById("calcBtn").textContent = texts[lang].button;
 }
 
@@ -89,8 +101,9 @@ function calculate() {
   const proteinRatio = parseFloat(document.getElementById("protein").value);
   const fatRatio = parseFloat(document.getElementById("fat").value);
   const carbRatio = parseFloat(document.getElementById("carb").value);
+  const meals = parseInt(document.getElementById("meals").value);
 
-  if (isNaN(totalCal) || isNaN(proteinRatio) || isNaN(fatRatio) || isNaN(carbRatio)) {
+  if (isNaN(totalCal) || isNaN(proteinRatio) || isNaN(fatRatio) || isNaN(carbRatio) || isNaN(meals)) {
     alert(texts[lang].alert);
     return;
   }
@@ -99,11 +112,27 @@ function calculate() {
   const fCal = totalCal * (fatRatio / 100);
   const cCal = totalCal * (carbRatio / 100);
 
+  const pGram = Math.round(pCal / 4);
+  const fGram = Math.round(fCal / 9);
+  const cGram = Math.round(cCal / 4);
+
+  const pPerMeal = Math.round(pGram / meals);
+  const fPerMeal = Math.round(fGram / meals);
+  const cPerMeal = Math.round(cGram / meals);
+  const calPerMeal = Math.round(totalCal / meals);
+
   const result = document.getElementById("result");
   result.innerHTML = `
-    <p><strong>${texts[lang].result.protein}:</strong> ${Math.round(pCal / 4)} g (${Math.round(pCal)} kcal)</p>
-    <p><strong>${texts[lang].result.fat}:</strong> ${Math.round(fCal / 9)} g (${Math.round(fCal)} kcal)</p>
-    <p><strong>${texts[lang].result.carb}:</strong> ${Math.round(cCal / 4)} g (${Math.round(cCal)} kcal)</p>
+    <h2>${lang === 'ja' ? "1日の食事の目安" : "Meal Plan for the Day"}</h2>
+    <p><strong>${texts[lang].result.protein}:</strong> ${pGram} g (${Math.round(pCal)} kcal)</p>
+    <p><strong>${texts[lang].result.fat}:</strong> ${fGram} g (${Math.round(fCal)} kcal)</p>
+    <p><strong>${texts[lang].result.carb}:</strong> ${cGram} g (${Math.round(cCal)} kcal)</p>
+    <hr>
+    <p><strong>${meals} ${lang === 'ja' ? "1回あたりの食事" : "meals per day (per meal)"}:</strong></p>
+    <p>${texts[lang].result.protein}: ${pPerMeal} g</p>
+    <p>${texts[lang].result.fat}: ${fPerMeal} g</p>
+    <p>${texts[lang].result.carb}: ${cPerMeal} g</p>
+    <p>${lang === 'ja' ? "合計" : "Total"}: ${calPerMeal} kcal</p>
   `;
   result.style.display = "block";
 }

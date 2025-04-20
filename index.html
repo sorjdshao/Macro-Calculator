@@ -13,7 +13,7 @@
   </style>
 </head>
 <body>
-  <div class="container">
+  <div class="container" id="pdfArea">
     <label for="language"><strong>Language / 言語:</strong></label>
     <select id="language" onchange="changeLanguage()">
       <option value="ja">日本語</option>
@@ -145,20 +145,17 @@ function calculate() {
 
 function downloadPDF() {
   const lang = document.getElementById("language").value;
-  const result = document.getElementById("result");
-  if (result.style.display === "none") {
-    alert(texts[lang].downloadAlert);
-    return;
-  }
+  const area = document.getElementById("pdfArea");
 
   const opt = {
-    margin: 0.5,
+    margin: 0.3,
     filename: lang === 'ja' ? 'PFC計算結果.pdf' : 'PFC_Macro_Result.pdf',
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
+    html2canvas: { scale: 3, useCORS: true },
     jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
   };
-  html2pdf().set(opt).from(result).save();
+
+  html2pdf().set(opt).from(area).save();
 }
 
 window.onload = changeLanguage;

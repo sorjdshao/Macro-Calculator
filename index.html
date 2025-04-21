@@ -53,6 +53,23 @@
       border-left: 5px solid #4CAF50;
       font-size: 16px;
       line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f0f0f0;
     }
 
     @media screen and (max-width: 480px) {
@@ -113,7 +130,6 @@
     <div class="result" id="result" style="display:none;"></div>
   </div>
 
-  <!-- PDF出力ライブラリ -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <script>
@@ -193,15 +209,37 @@
       const result = document.getElementById("result");
       result.innerHTML = `
         <h2>${lang === 'ja' ? "1日の食事の目安" : "Meal Plan for the Day"}</h2>
-        <p><strong>${texts[lang].result.protein}:</strong> ${pGram} g (${Math.round(pCal)} kcal)</p>
-        <p><strong>${texts[lang].result.fat}:</strong> ${fGram} g (${Math.round(fCal)} kcal)</p>
-        <p><strong>${texts[lang].result.carb}:</strong> ${cGram} g (${Math.round(cCal)} kcal)</p>
-        <hr>
-        <p><strong>${meals} ${lang === 'ja' ? "回の食事の場合（1回あたり）" : "meals per day (per meal)"}:</strong></p>
-        <p>${texts[lang].result.protein}: ${pPerMeal} g</p>
-        <p>${texts[lang].result.fat}: ${fPerMeal} g</p>
-        <p>${texts[lang].result.carb}: ${cPerMeal} g</p>
-        <p>${lang === 'ja' ? "合計" : "Total"}: ${calPerMeal} kcal</p>
+        <table>
+          <thead>
+            <tr>
+              <th>${lang === 'ja' ? "栄養素" : "Nutrient"}</th>
+              <th>${lang === 'ja' ? "合計 (g)" : "Total (g)"}</th>
+              <th>kcal</th>
+              <th>${lang === 'ja' ? "1食あたり (g)" : "Per Meal (g)"}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${texts[lang].result.protein}</td>
+              <td>${pGram}</td>
+              <td>${Math.round(pCal)}</td>
+              <td>${pPerMeal}</td>
+            </tr>
+            <tr>
+              <td>${texts[lang].result.fat}</td>
+              <td>${fGram}</td>
+              <td>${Math.round(fCal)}</td>
+              <td>${fPerMeal}</td>
+            </tr>
+            <tr>
+              <td>${texts[lang].result.carb}</td>
+              <td>${cGram}</td>
+              <td>${Math.round(cCal)}</td>
+              <td>${cPerMeal}</td>
+            </tr>
+          </tbody>
+        </table>
+        <p><strong>${lang === 'ja' ? "1食あたりの合計カロリー" : "Calories per meal"}:</strong> ${calPerMeal} kcal</p>
       `;
       result.style.display = "block";
     }
@@ -210,25 +248,20 @@
       const lang = document.getElementById("language").value;
       const result = document.getElementById("result");
 
-      if (result.style.display === "none") {
+      if (!result || result.style.display === "none" || result.innerHTML.trim() === "") {
         alert(texts[lang].downloadAlert);
         return;
       }
 
-      const originalDisplay = result.style.display;
-      result.style.display = "block";
-
       const opt = {
-        margin: 0.3,
-        filename: lang === 'ja' ? 'PFC計算結果.pdf' : 'PFC_Macro_Result.pdf',
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 3, useCORS: true },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+        margin: 0.5,
+        filename: lang === "ja" ? "PFC_計算結果.pdf" : "PFC_Macro_Result.pdf",
+        image: { type: "jpeg", quality: 1 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: "in", format: "a4", orientation: "portrait" }
       };
 
-      html2pdf().set(opt).from(result).save().then(() => {
-        result.style.display = originalDisplay;
-      });
+      html2pdf().set(opt).from(result).save();
     }
 
     window.onload = changeLanguage;

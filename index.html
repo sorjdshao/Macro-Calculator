@@ -2,119 +2,52 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>PFCバランス計算機 - 多言語対応</title>
+  <title>PFCバランス計算機</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f5f5f5;
-      padding: 16px;
-      font-size: 16px;
-    }
-
-    .container {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 100%;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    label {
-      display: block;
-      margin-top: 16px;
-      font-weight: bold;
-    }
-
+    body { font-family: sans-serif; background: #f5f5f5; padding: 16px; font-size: 16px; }
+    .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 100%; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 16px; font-weight: bold; }
     input, select, button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 8px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
+      width: 100%; padding: 14px; margin-top: 8px; font-size: 16px;
+      border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box;
     }
-
+    input.error { border: 2px solid red; }
     button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      margin-top: 16px;
-      cursor: pointer;
+      background: #4CAF50; color: white; border: none; margin-top: 16px; cursor: pointer;
     }
-
-    .result {
-      background: #eaffea;
-      padding: 16px;
-      margin-top: 20px;
-      border-radius: 6px;
-      border-left: 5px solid #4CAF50;
-      font-size: 16px;
-      line-height: 1.6;
-      overflow-x: auto;
+    .result, .guide {
+      background: #eaffea; padding: 16px; margin-top: 20px;
+      border-radius: 6px; border-left: 5px solid #4CAF50; font-size: 16px; line-height: 1.6; overflow-x: auto;
     }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 12px;
-    }
-
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #f0f0f0;
-    }
-
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #f0f0f0; }
     @media screen and (max-width: 480px) {
-      body {
-        padding: 12px;
-      }
-
-      .container {
-        padding: 16px;
-      }
-
-      input, select, button {
-        font-size: 18px;
-        padding: 16px;
-      }
-
-      .result {
-        font-size: 18px;
-      }
+      body { padding: 12px; }
+      .container { padding: 16px; }
+      input, select, button { font-size: 18px; padding: 16px; }
+      .result, .guide { font-size: 18px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <label for="language"><strong>Language / 言語:</strong></label>
-    <select id="language" onchange="changeLanguage()">
-      <option value="ja">日本語</option>
-      <option value="en">English</option>
-    </select>
+    <h1>PFCバランス計算機</h1>
 
-    <h1 id="title">PFCバランス計算機</h1>
-
-    <label id="label-total">総摂取カロリー（kcal）</label>
+    <label>総摂取カロリー（kcal）</label>
     <input type="number" id="totalCal" placeholder="例: 2000">
 
-    <label id="label-protein">タンパク質の割合（%）</label>
+    <label>タンパク質の割合（%）</label>
     <input type="number" id="protein" placeholder="例: 30">
 
-    <label id="label-fat">脂質の割合（%）</label>
+    <label>脂質の割合（%）</label>
     <input type="number" id="fat" placeholder="例: 20">
 
-    <label id="label-carb">炭水化物の割合（%）</label>
+    <label>炭水化物の割合（%）</label>
     <input type="number" id="carb" placeholder="例: 50">
 
-    <label id="label-meals">1日の食事回数</label>
+    <label>1日の食事回数</label>
     <select id="meals">
       <option value="1">1回</option>
       <option value="2">2回</option>
@@ -124,67 +57,57 @@
       <option value="6">6回</option>
     </select>
 
-    <button id="calcBtn" onclick="calculate()">計算する</button>
+    <button onclick="calculate()">計算する</button>
 
     <div class="result" id="result" style="display:none;"></div>
+    
+        <div class="guide">
+      <h2>PFCバランスの参考（ダイエット方針別）</h2>
+      <table>
+        <thead>
+          <tr><th>ダイエット方針</th><th>説明</th><th>推奨P・F・C（％）</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Low Fat（脂質制限）</td><td>脂質を抑えて炭水化物を中心に摂る</td><td>P 25〜35%, F 10〜20%, C 45〜60%</td></tr>
+          <tr><td>Low Carb（炭水化物制限）</td><td>炭水化物を抑えて脂質を活用する</td><td>P 30〜40%, F 25〜35%, C 20〜30%</td></tr>
+          <tr><td>VLC（Very Low Carb）</td><td>炭水化物を極端に抑え脂質主体（ケト系）</td><td>P 30〜35%, F 55〜65%, C 5〜10%</td></tr>
+          <tr><td>VLCD（Very Low Calorie Diet）</td><td>800kcal未満の医療向け超低カロリー食</td><td>P 30〜40%, F 20〜30%, C 30〜40%</td></tr>
+        </tbody>
+      </table>
+      <p style="color: red; margin-top: 1em;">
+        ※ VLCD（Very Low Calorie Diet）は医療管理下で行う特殊な減量法です。自己判断で実施しないでください。
+      </p>
+    </div>
   </div>
 
   <script>
-    const texts = {
-      ja: {
-        title: "PFCバランス計算機",
-        label_total: "総摂取カロリー（kcal）",
-        label_protein: "タンパク質の割合（%）",
-        label_fat: "脂質の割合（%）",
-        label_carb: "炭水化物の割合（%）",
-        label_meals: "1日の食事回数",
-        button: "計算する",
-        result: {
-          protein: "タンパク質",
-          fat: "脂質",
-          carb: "炭水化物"
-        },
-        alert: "すべての値を正しく入力してください"
-      },
-      en: {
-        title: "PFC Macro Calculator",
-        label_total: "Total Calorie Intake (kcal)",
-        label_protein: "Protein Ratio (%)",
-        label_fat: "Fat Ratio (%)",
-        label_carb: "Carbohydrate Ratio (%)",
-        label_meals: "Number of meals per day",
-        button: "Calculate",
-        result: {
-          protein: "Protein",
-          fat: "Fat",
-          carb: "Carbohydrates"
-        },
-        alert: "Please enter all values correctly"
-      }
-    };
-
-    function changeLanguage() {
-      const lang = document.getElementById("language").value;
-      document.documentElement.lang = lang;
-      document.getElementById("title").textContent = texts[lang].title;
-      document.getElementById("label-total").textContent = texts[lang].label_total;
-      document.getElementById("label-protein").textContent = texts[lang].label_protein;
-      document.getElementById("label-fat").textContent = texts[lang].label_fat;
-      document.getElementById("label-carb").textContent = texts[lang].label_carb;
-      document.getElementById("label-meals").textContent = texts[lang].label_meals;
-      document.getElementById("calcBtn").textContent = texts[lang].button;
-    }
-
     function calculate() {
-      const lang = document.getElementById("language").value;
       const totalCal = parseFloat(document.getElementById("totalCal").value);
       const proteinRatio = parseFloat(document.getElementById("protein").value);
       const fatRatio = parseFloat(document.getElementById("fat").value);
       const carbRatio = parseFloat(document.getElementById("carb").value);
       const meals = parseInt(document.getElementById("meals").value);
 
-      if (isNaN(totalCal) || isNaN(proteinRatio) || isNaN(fatRatio) || isNaN(carbRatio) || isNaN(meals)) {
-        alert(texts[lang].alert);
+      const inputs = ["totalCal", "protein", "fat", "carb"];
+      let hasError = false;
+
+      inputs.forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.remove("error");
+        if (!el.value || isNaN(parseFloat(el.value))) {
+          el.classList.add("error");
+          hasError = true;
+        }
+      });
+
+      if (hasError) {
+        alert("すべての値を正しく入力してください");
+        return;
+      }
+
+      if (proteinRatio + fatRatio + carbRatio > 100) {
+        ["protein", "fat", "carb"].forEach(id => document.getElementById(id).classList.add("error"));
+        alert("P・F・Cの合計が100%を超えています。再確認してください。");
         return;
       }
 
@@ -203,43 +126,21 @@
 
       const result = document.getElementById("result");
       result.innerHTML = `
-        <h2>${lang === 'ja' ? "1日の食事の目安" : "Meal Plan for the Day"}</h2>
+        <h2>1日の食事の目安</h2>
         <table>
           <thead>
-            <tr>
-              <th>${lang === 'ja' ? "栄養素" : "Nutrient"}</th>
-              <th>${lang === 'ja' ? "合計 (g)" : "Total (g)"}</th>
-              <th>kcal</th>
-              <th>${lang === 'ja' ? "1食あたり (g)" : "Per Meal (g)"}</th>
-            </tr>
+            <tr><th>栄養素</th><th>合計 (g)</th><th>kcal</th><th>1食あたり (g)</th></tr>
           </thead>
           <tbody>
-            <tr>
-              <td>${texts[lang].result.protein}</td>
-              <td>${pGram}</td>
-              <td>${Math.round(pCal)}</td>
-              <td>${pPerMeal}</td>
-            </tr>
-            <tr>
-              <td>${texts[lang].result.fat}</td>
-              <td>${fGram}</td>
-              <td>${Math.round(fCal)}</td>
-              <td>${fPerMeal}</td>
-            </tr>
-            <tr>
-              <td>${texts[lang].result.carb}</td>
-              <td>${cGram}</td>
-              <td>${Math.round(cCal)}</td>
-              <td>${cPerMeal}</td>
-            </tr>
+            <tr><td>タンパク質</td><td>${pGram}</td><td>${Math.round(pCal)}</td><td>${pPerMeal}</td></tr>
+            <tr><td>脂質</td><td>${fGram}</td><td>${Math.round(fCal)}</td><td>${fPerMeal}</td></tr>
+            <tr><td>炭水化物</td><td>${cGram}</td><td>${Math.round(cCal)}</td><td>${cPerMeal}</td></tr>
           </tbody>
         </table>
-        <p><strong>${lang === 'ja' ? "1食あたりの合計カロリー" : "Calories per meal"}:</strong> ${calPerMeal} kcal</p>
+        <p><strong>1食あたりの合計カロリー:</strong> ${calPerMeal} kcal</p>
       `;
       result.style.display = "block";
     }
-
-    window.onload = changeLanguage;
   </script>
 </body>
 </html>

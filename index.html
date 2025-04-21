@@ -1,251 +1,174 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>PFCバランス計算機 - 多言語対応</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8">
+  <title>ピーキング戦略（大会当日）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f5f5f5;
-      padding: 16px;
-      font-size: 16px;
-    }
-
-    .container {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 100%;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    label {
-      display: block;
-      margin-top: 16px;
-      font-weight: bold;
-    }
-
-    input, select, button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 8px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-
-    button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      margin-top: 16px;
-      cursor: pointer;
-    }
-
-    .result {
-      background: #eaffea;
-      padding: 16px;
-      margin-top: 20px;
-      border-radius: 6px;
-      border-left: 5px solid #4CAF50;
-      font-size: 16px;
-      line-height: 1.6;
-    }
-
-    @media screen and (max-width: 480px) {
-      body {
-        padding: 12px;
-      }
-
-      .container {
-        padding: 16px;
-      }
-
-      input, select, button {
-        font-size: 18px;
-        padding: 16px;
-      }
-
-      .result {
-        font-size: 18px;
-      }
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 900px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input, select { width: 100%; padding: 8px; margin-top: 5px; }
+    button { margin-top: 20px; padding: 10px; font-size: 1em; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 6px; text-align: center; }
+    th { background-color: #eee; }
+    @media print {
+      button { display: none; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <label for="language"><strong>Language / 言語:</strong></label>
-    <select id="language" onchange="changeLanguage()">
-      <option value="ja">日本語</option>
-      <option value="en">English</option>
-    </select>
+<div class="container">
+  <h1>ピーキング戦略（大会当日）</h1>
 
-    <h1 id="title">PFCバランス計算機</h1>
+  <label>体重（kg）</label>
+  <input id="weight" type="number" placeholder="例：70" />
 
-    <label id="label-total">総摂取カロリー（kcal）</label>
-    <input type="number" id="totalCal" placeholder="例: 2000">
+  <label>体脂肪率（％）</label>
+  <input id="bodyfat" type="number" placeholder="例：10" />
 
-    <label id="label-protein">タンパク質の割合（%）</label>
-    <input type="number" id="protein" placeholder="例: 30">
+  <label>TDEE（1日の消費カロリー）</label>
+  <input id="tdee" type="number" placeholder="例：2400" />
 
-    <label id="label-fat">脂質の割合（%）</label>
-    <input type="number" id="fat" placeholder="例: 20">
+  <label>起床時間</label>
+  <input id="wakeTime" type="time" />
 
-    <label id="label-carb">炭水化物の割合（%）</label>
-    <input type="number" id="carb" placeholder="例: 50">
+  <label>ステージ数</label>
+  <select id="stageCount">
+    <option value="1">1ステージ</option>
+    <option value="2">2ステージ</option>
+    <option value="3">3ステージ</option>
+  </select>
 
-    <label id="label-meals">1日の食事回数</label>
-    <select id="meals">
-      <option value="1">1回</option>
-      <option value="2">2回</option>
-      <option value="3" selected>3回</option>
-      <option value="4">4回</option>
-      <option value="5">5回</option>
-      <option value="6">6回</option>
-    </select>
+  <label>ステージ1の時間</label>
+  <input id="stageTime1" type="time" />
 
-    <button id="calcBtn" onclick="calculate()">計算する</button>
-    <button onclick="downloadPDF()">PDFとして保存</button>
+  <label>ステージ2の時間</label>
+  <input id="stageTime2" type="time" />
 
-    <div class="result" id="result" style="display:none;"></div>
-  </div>
+  <label>ステージ3の時間</label>
+  <input id="stageTime3" type="time" />
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script>
-    const texts = {
-      ja: {
-        title: "PFCバランス計算機",
-        label_total: "総摂取カロリー（kcal）",
-        label_protein: "タンパク質の割合（%）",
-        label_fat: "脂質の割合（%）",
-        label_carb: "炭水化物の割合（%）",
-        label_meals: "1日の食事回数",
-        button: "計算する",
-        result: {
-          protein: "タンパク質",
-          fat: "脂質",
-          carb: "炭水化物"
-        },
-        alert: "すべての値を正しく入力してください",
-        downloadAlert: "先に計算を行ってください"
-      },
-      en: {
-        title: "PFC Macro Calculator",
-        label_total: "Total Calorie Intake (kcal)",
-        label_protein: "Protein Ratio (%)",
-        label_fat: "Fat Ratio (%)",
-        label_carb: "Carbohydrate Ratio (%)",
-        label_meals: "Number of meals per day",
-        button: "Calculate",
-        result: {
-          protein: "Protein",
-          fat: "Fat",
-          carb: "Carbohydrates"
-        },
-        alert: "Please enter all values correctly",
-        downloadAlert: "Please calculate first before downloading"
-      }
-    };
+  <label>パンプアップ開始時間（ステージの◯分前）</label>
+  <input id="pumpMinutes" type="number" placeholder="例：30" />
 
-    function changeLanguage() {
-      const lang = document.getElementById("language").value;
-      document.documentElement.lang = lang;
-      document.getElementById("title").textContent = texts[lang].title;
-      document.getElementById("label-total").textContent = texts[lang].label_total;
-      document.getElementById("label-protein").textContent = texts[lang].label_protein;
-      document.getElementById("label-fat").textContent = texts[lang].label_fat;
-      document.getElementById("label-carb").textContent = texts[lang].label_carb;
-      document.getElementById("label-meals").textContent = texts[lang].label_meals;
-      document.getElementById("calcBtn").textContent = texts[lang].button;
-    }
+  <label>食事間隔（分）</label>
+  <input id="mealInterval" type="number" placeholder="例：120" />
 
-    function calculate() {
-      const lang = document.getElementById("language").value;
-      const totalCal = parseFloat(document.getElementById("totalCal").value);
-      const proteinRatio = parseFloat(document.getElementById("protein").value);
-      const fatRatio = parseFloat(document.getElementById("fat").value);
-      const carbRatio = parseFloat(document.getElementById("carb").value);
-      const meals = parseInt(document.getElementById("meals").value);
+  <label>当日の総摂取カロリー</label>
+  <input id="todayCalories" type="number" placeholder="例：2200" />
 
-      if (isNaN(totalCal) || isNaN(proteinRatio) || isNaN(fatRatio) || isNaN(carbRatio) || isNaN(meals)) {
-        alert(texts[lang].alert);
-        return;
-      }
+  <label>水分感受性</label>
+  <select id="waterSensitivity">
+    <option value="low">低</option>
+    <option value="medium" selected>中</option>
+    <option value="high">高</option>
+  </select>
 
-      const pCal = totalCal * (proteinRatio / 100);
-      const fCal = totalCal * (fatRatio / 100);
-      const cCal = totalCal * (carbRatio / 100);
+  <label>塩分感受性</label>
+  <select id="saltSensitivity">
+    <option value="low">低</option>
+    <option value="medium" selected>中</option>
+    <option value="high">高</option>
+  </select>
 
-      const pGram = Math.round(pCal / 4);
-      const fGram = Math.round(fCal / 9);
-      const cGram = Math.round(cCal / 4);
+  <label>炭水化物の配分戦略</label>
+  <select id="carbTiming">
+    <option value="even">均等に配分</option>
+    <option value="front">前半に多め</option>
+    <option value="back" selected>後半に多め</option>
+  </select>
 
-      const pPerMeal = Math.round(pGram / meals);
-      const fPerMeal = Math.round(fGram / meals);
-      const cPerMeal = Math.round(cGram / meals);
-      const calPerMeal = Math.round(totalCal / meals);
+  <button onclick="generateCompetitionDayPlan()">当日スケジュールを表示</button>
 
-      const result = document.getElementById("result");
-      result.innerHTML = `
-        <h2>${lang === 'ja' ? "1日の食事の目安" : "Meal Plan for the Day"}</h2>
-        <p><strong>${texts[lang].result.protein}:</strong> ${pGram} g (${Math.round(pCal)} kcal)</p>
-        <p><strong>${texts[lang].result.fat}:</strong> ${fGram} g (${Math.round(fCal)} kcal)</p>
-        <p><strong>${texts[lang].result.carb}:</strong> ${cGram} g (${Math.round(cCal)} kcal)</p>
-        <hr>
-        <p><strong>${meals} ${lang === 'ja' ? "回の食事の場合（1回あたり）" : "meals per day (per meal)"}:</strong></p>
-        <p>${texts[lang].result.protein}: ${pPerMeal} g</p>
-        <p>${texts[lang].result.fat}: ${fPerMeal} g</p>
-        <p>${texts[lang].result.carb}: ${cPerMeal} g</p>
-        <p>${lang === 'ja' ? "合計" : "Total"}: ${calPerMeal} kcal</p>
-      `;
-      result.style.display = "block";
-    }
+  <div id="output"></div>
+</div>
 
-    function downloadPDF() {
-      const lang = document.getElementById("language").value;
-      const result = document.getElementById("result");
+<script>
+function generateCompetitionDayPlan() {
+  const weight = parseFloat(document.getElementById("weight").value);
+  const bodyfat = parseFloat(document.getElementById("bodyfat").value);
+  const tdee = parseFloat(document.getElementById("tdee").value);
+  const wakeTime = document.getElementById("wakeTime").value;
+  const stageCount = parseInt(document.getElementById("stageCount").value);
+  const stageTime1 = document.getElementById("stageTime1").value;
+  const stageTime2 = document.getElementById("stageTime2").value;
+  const stageTime3 = document.getElementById("stageTime3").value;
+  const pumpMinutes = parseInt(document.getElementById("pumpMinutes").value);
+  const mealInterval = parseInt(document.getElementById("mealInterval").value);
+  const todayCalories = parseInt(document.getElementById("todayCalories").value);
+  const waterSensitivity = document.getElementById("waterSensitivity").value;
+  const saltSensitivity = document.getElementById("saltSensitivity").value;
+  const carbTiming = document.getElementById("carbTiming").value;
 
-      if (result.style.display === "none") {
-        alert(texts[lang].downloadAlert);
-        return;
-      }
+  const leanWeight = weight * (1 - bodyfat / 100);
+  const baseProtein = Math.round(leanWeight * 2.3);
+  const baseFat = 30;
+  const proteinKcal = baseProtein * 4;
+  const fatKcal = baseFat * 9;
+  const carbKcal = todayCalories - proteinKcal - fatKcal;
+  const totalCarb = Math.round(carbKcal / 4);
 
-      const clone = result.cloneNode(true);
-      clone.style.display = "block";
-      clone.style.background = "#ffffff";
-      clone.style.color = "#000000";
-      clone.style.padding = "20px";
-      clone.style.width = "100%";
-      clone.style.fontSize = "16px";
-      clone.style.lineHeight = "1.5";
-      clone.style.border = "none";
+  const mealCount = Math.floor((12 * 60) / mealInterval);
+  const pMeal = Math.round(baseProtein / mealCount);
+  const fMeal = Math.round(baseFat / mealCount);
 
-      const tempDiv = document.createElement("div");
-      tempDiv.style.position = "fixed";
-      tempDiv.style.top = "0";
-      tempDiv.style.left = "0";
-      tempDiv.style.width = "100%";
-      tempDiv.style.zIndex = "9999";
-      tempDiv.appendChild(clone);
-      document.body.appendChild(tempDiv);
+  let carbWeights = [];
+  for (let i = 0; i < mealCount; i++) {
+    if (carbTiming === "even") carbWeights.push(1);
+    else if (carbTiming === "front") carbWeights.push(i < mealCount / 2 ? 1.2 : 0.8);
+    else carbWeights.push(i < mealCount / 2 ? 0.8 : 1.2);
+  }
+  const totalWeight = carbWeights.reduce((a, b) => a + b, 0);
+  const cMeals = carbWeights.map(w => Math.round((totalCarb * w) / totalWeight));
 
-      const opt = {
-        margin: 0.3,
-        filename: lang === 'ja' ? 'PFC計算結果.pdf' : 'PFC_Macro_Result.pdf',
-        image: { type: 'jpeg', quality: 1 },
-        html2canvas: { scale: 3, useCORS: true },
-        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-      };
+  const adjust = (val, sens) => {
+    const factor = { low: 1.2, medium: 1.0, high: 0.8 };
+    return (val * factor[sens]).toFixed(1);
+  };
+  const water = adjust(Math.max(weight * 0.05, 1.5), waterSensitivity);
+  const salt = Math.round(adjust(Math.max(weight * 0.1, 2), saltSensitivity));
 
-      html2pdf().set(opt).from(tempDiv).save().then(() => {
-        document.body.removeChild(tempDiv);
-      });
-    }
+  const [wakeH, wakeM] = wakeTime.split(":").map(Number);
+  const startTime = new Date(0, 0, 0, wakeH, wakeM);
+  const output = document.getElementById("output");
+  output.innerHTML = "<h3>大会当日スケジュール</h3>";
+  output.innerHTML += `<p>総カロリー: ${todayCalories} kcal / 水分: ${water} L / 塩分: ${salt} g</p>`;
+  output.innerHTML += "<table><thead><tr><th>時間</th><th>内容</th><th>P</th><th>F</th><th>C</th></tr></thead><tbody>";
 
-    window.onload = changeLanguage;
-  </script>
+  for (let i = 0; i < mealCount; i++) {
+    const timeStr = startTime.toTimeString().slice(0, 5);
+    output.innerHTML += `<tr><td>${timeStr}</td><td>食事${i + 1}</td><td>${pMeal}g</td><td>${fMeal}g</td><td>${cMeals[i]}g</td></tr>`;
+    startTime.setMinutes(startTime.getMinutes() + mealInterval);
+  }
+
+  if (stageTime1) {
+    const [sh, sm] = stageTime1.split(":").map(Number);
+    const pump1 = new Date(0, 0, 0, sh, sm);
+    pump1.setMinutes(pump1.getMinutes() - pumpMinutes);
+    output.innerHTML += `<tr><td>${pump1.toTimeString().slice(0, 5)}</td><td>パンプアップ1</td><td>-</td><td>-</td><td>-</td></tr>`;
+    output.innerHTML += `<tr><td>${stageTime1}</td><td>ステージ1</td><td>-</td><td>-</td><td>-</td></tr>`;
+  }
+
+  if ((stageCount === 2 || stageCount === 3) && stageTime2) {
+    const [sh2, sm2] = stageTime2.split(":").map(Number);
+    const pump2 = new Date(0, 0, 0, sh2, sm2);
+    pump2.setMinutes(pump2.getMinutes() - pumpMinutes);
+    output.innerHTML += `<tr><td>${pump2.toTimeString().slice(0, 5)}</td><td>パンプアップ2</td><td>-</td><td>-</td><td>-</td></tr>`;
+    output.innerHTML += `<tr><td>${stageTime2}</td><td>ステージ2</td><td>-</td><td>-</td><td>-</td></tr>`;
+  }
+
+  if (stageCount === 3 && stageTime3) {
+    const [sh3, sm3] = stageTime3.split(":").map(Number);
+    const pump3 = new Date(0, 0, 0, sh3, sm3);
+    pump3.setMinutes(pump3.getMinutes() - pumpMinutes);
+    output.innerHTML += `<tr><td>${pump3.toTimeString().slice(0, 5)}</td><td>パンプアップ3</td><td>-</td><td>-</td><td>-</td></tr>`;
+    output.innerHTML += `<tr><td>${stageTime3}</td><td>ステージ3</td><td>-</td><td>-</td><td>-</td></tr>`;
+  }
+
+  output.innerHTML += "</tbody></table>";
+}
+</script>
 </body>
 </html>

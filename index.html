@@ -16,18 +16,33 @@
     button {
       background: #4CAF50; color: white; border: none; margin-top: 16px; cursor: pointer;
     }
-    .result, .guide {
+    .result {
       background: #eaffea; padding: 16px; margin-top: 20px;
       border-radius: 6px; border-left: 5px solid #4CAF50; font-size: 16px; line-height: 1.6; overflow-x: auto;
     }
-    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background-color: #f0f0f0; }
-    @media screen and (max-width: 480px) {
-      body { padding: 12px; }
-      .container { padding: 16px; }
-      input, select, button { font-size: 18px; padding: 16px; }
-      .result, .guide { font-size: 18px; }
+    .guide {
+      margin-top: 24px;
+    }
+    .diet-card {
+      background: #f9f9f9;
+      padding: 12px;
+      margin-top: 10px;
+      border-left: 5px solid #4CAF50;
+      border-radius: 6px;
+    }
+    .diet-card span {
+      display: block;
+      margin-top: 4px;
+      font-weight: bold;
+    }
+    .diet-card.vlcd {
+      background: #fff0f0;
+      border-left-color: #e53935;
+    }
+    .diet-card .warning {
+      color: red;
+      font-weight: bold;
+      margin-top: 6px;
     }
   </style>
 </head>
@@ -60,23 +75,35 @@
     <button onclick="calculate()">計算する</button>
 
     <div class="result" id="result" style="display:none;"></div>
-    
-        <div class="guide">
+
+    <div class="guide">
       <h2>PFCバランスの参考（ダイエット方針別）</h2>
-      <table>
-        <thead>
-          <tr><th>ダイエット方針</th><th>説明</th><th>推奨P・F・C（％）</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Low Fat（脂質制限）</td><td>脂質を抑えて炭水化物を中心に摂る</td><td>P 25〜35%, F 10〜20%, C 45〜60%</td></tr>
-          <tr><td>Low Carb（炭水化物制限）</td><td>炭水化物を抑えて脂質を活用する</td><td>P 30〜40%, F 25〜35%, C 20〜30%</td></tr>
-          <tr><td>VLC（Very Low Carb）</td><td>炭水化物を極端に抑え脂質主体（ケト系）</td><td>P 30〜35%, F 55〜65%, C 5〜10%</td></tr>
-          <tr><td>VLCD（Very Low Calorie Diet）</td><td>800kcal未満の医療向け超低カロリー食</td><td>P 30〜40%, F 20〜30%, C 30〜40%</td></tr>
-        </tbody>
-      </table>
-      <p style="color: red; margin-top: 1em;">
-        ※ VLCD（Very Low Calorie Diet）は医療管理下で行う特殊な減量法です。自己判断で実施しないでください。
-      </p>
+      <p>代表的なダイエット方針ごとのPFCバランスの目安です。</p>
+
+      <div class="diet-card">
+        <strong>Low Fat（脂質制限）</strong><br>
+        脂質を抑えて炭水化物を中心に摂る<br>
+        <span>P: 25〜35% / F: 10〜20% / C: 45〜60%</span>
+      </div>
+
+      <div class="diet-card">
+        <strong>Low Carb（炭水化物制限）</strong><br>
+        炭水化物を抑えて脂質を活用する<br>
+        <span>P: 30〜40% / F: 25〜35% / C: 20〜30%</span>
+      </div>
+
+      <div class="diet-card">
+        <strong>VLC（Very Low Carb）</strong><br>
+        極端に炭水化物を減らし、脂質中心（ケト系）<br>
+        <span>P: 30〜35% / F: 55〜65% / C: 5〜10%</span>
+      </div>
+
+      <div class="diet-card vlcd">
+        <strong>VLCD（Very Low Calorie Diet）</strong><br>
+        医療向けの超低カロリー（800kcal未満）<br>
+        <span>P: 30〜40% / F: 20〜30% / C: 30〜40%</span><br>
+        <span class="warning">※ 医療管理下以外では行わないでください</span>
+      </div>
     </div>
   </div>
 
@@ -105,9 +132,10 @@
         return;
       }
 
-      if (proteinRatio + fatRatio + carbRatio > 100) {
+      const totalRatio = proteinRatio + fatRatio + carbRatio;
+      if (Math.round(totalRatio) !== 100) {
         ["protein", "fat", "carb"].forEach(id => document.getElementById(id).classList.add("error"));
-        alert("P・F・Cの合計が100%を超えています。再確認してください。");
+        alert("P・F・Cの合計が100%になるように入力してください（現在: " + totalRatio.toFixed(1) + "%）");
         return;
       }
 

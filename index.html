@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>PFCバランス計算機</title>
+  <title>PFCバランス計算機（プロ版 完成版）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -96,15 +96,39 @@
       margin-top: 30px;
       text-align: center;
     }
-    canvas {
+    .chart-wrapper {
+      position: relative;
+      height: 400px;
       max-width: 400px;
       margin: auto;
+    }
+    #pfcChart {
+      width: 100%;
+      height: 100%;
+    }
+    .center-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: 700;
+      font-size: 1.5em;
+      color: #333;
+      pointer-events: none;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .center-text small {
+      display: block;
+      font-weight: 400;
+      font-size: 0.6em;
+      color: #777;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>PFCバランス計算機</h1>
+    <h1>PFCバランス計算機（プロ版 完成版）</h1>
 
     <label>総摂取カロリー（kcal）</label>
     <input type="number" id="totalCal" placeholder="例: 2000">
@@ -127,7 +151,10 @@
 
     <div id="chartContainer" style="display:none;">
       <h2>バランスグラフ</h2>
-      <canvas id="pfcChart"></canvas>
+      <div class="chart-wrapper">
+        <canvas id="pfcChart"></canvas>
+        <div id="centerText" class="center-text"></div>
+      </div>
     </div>
   </div>
 
@@ -135,31 +162,6 @@
 
   <script>
     let chartInstance = null;
-    let totalCal = 0;
-
-    const centerTextPlugin = {
-      id: 'centerText',
-      beforeDraw(chart) {
-        const { width, height } = chart;
-        const ctx = chart.ctx;
-        ctx.save();
-        const fontSizeMain = (height / 150).toFixed(2);
-        ctx.font = `700 ${fontSizeMain}em 'Poppins', sans-serif`;
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#333';
-        const text = `${totalCal} kcal`;
-        const textX = (width - ctx.measureText(text).width) / 2;
-        const textY = height / 2 - 10;
-        ctx.fillText(text, textX, textY);
-        ctx.font = `400 ${(height/250).toFixed(2)}em 'Poppins', sans-serif`;
-        ctx.fillStyle = '#777';
-        const subText = 'Total Intake';
-        const subTextX = (width - ctx.measureText(subText).width) / 2;
-        const subTextY = height / 2 + 20;
-        ctx.fillText(subText, subTextX, subTextY);
-        ctx.restore();
-      }
-    };
 
     function saveInputs() {
       ["totalCal", "protein", "fat", "carb"].forEach(id => {
@@ -178,7 +180,7 @@
 
     function calculate() {
       saveInputs();
-      totalCal = parseFloat(document.getElementById("totalCal").value);
+      const totalCal = parseFloat(document.getElementById("totalCal").value);
       const proteinRatio = parseFloat(document.getElementById("protein").value);
       const fatRatio = parseFloat(document.getElementById("fat").value);
       const carbRatio = parseFloat(document.getElementById("carb").value);
@@ -243,10 +245,12 @@
             legend: { position: 'bottom' },
             tooltip: { enabled: true }
           }
-        },
-        plugins: [centerTextPlugin]
+        }
       });
       document.getElementById("chartContainer").style.display = "block";
+
+      // 中央テキスト更新
+      document.getElementById('centerText').innerHTML = `${totalCal} kcal<small>Total Intake</small>`;
     }
 
     function copyResult() {

@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>PFCバランス計算機（プロ版・完全版）</title>
+  <title>PFCバランス計算機（プロ版・最適版）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -25,6 +25,9 @@
       margin-bottom: 20px;
       font-weight: 700;
       color: #333;
+    }
+    label, th, td {
+      word-break: keep-all; /* 単語を途中で改行しない */
     }
     label {
       display: block;
@@ -98,7 +101,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>PFCバランス計算機（プロ版・完全版）</h1>
+    <h1>PFCバランス計算機（プロ版・最適版）</h1>
 
     <label>総摂取カロリー（kcal）</label>
     <input type="number" id="totalCal" placeholder="例: 2000">

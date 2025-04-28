@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>PFCバランス計算機（プロ版 完成版）</title>
+  <title>PFCバランス計算機（プロ版 完全版）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -40,10 +40,6 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       box-sizing: border-box;
-      transition: border-color 0.3s;
-    }
-    input.error {
-      border-color: #f44336;
     }
     button {
       width: 100%;
@@ -55,53 +51,40 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
-      transition: background 0.3s;
     }
     button:hover {
       background: #45a049;
     }
-    .copy-btn {
-      background: #2196F3;
-      margin-top: 10px;
-    }
-    .copy-btn:hover {
-      background: #1976D2;
-    }
-    .total-percentage {
+    #chartContainer {
+      margin-top: 30px;
       text-align: center;
+      position: relative;
+    }
+    #pfcChart {
+      max-width: 400px;
+      margin: auto;
+    }
+    #centerText {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       font-weight: bold;
-      color: #555;
-      margin-top: 10px;
-    }
-    .result {
-      background: #fff;
-      padding: 20px;
-      margin-top: 20px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-      overflow-x: auto;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 12px;
+      font-size: 1.2em;
+      color: #333;
+      pointer-events: none;
       text-align: center;
-      background: #fafafa;
     }
-    th {
-      background: #eeeeee;
-      font-weight: bold;
+    #centerText small {
+      display: block;
+      font-size: 0.7em;
+      color: #777;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>PFCバランス計算機（プロ版 完成版）</h1>
+    <h1>PFCバランス計算機（プロ版 完全版）</h1>
 
     <label>総摂取カロリー（kcal）</label>
     <input type="number" id="totalCal" placeholder="例: 2000">
@@ -115,106 +98,76 @@
     <label>炭水化物の割合（%）</label>
     <input type="number" id="carb" placeholder="例: 50">
 
-    <div class="total-percentage" id="totalPercentage">合計: 0%</div>
-
     <button onclick="calculate()">再計算する</button>
 
-    <div id="resultContainer" class="result">
-      <h2>結果（1日あたり）</h2>
-      <table>
-        <thead>
-          <tr><th>栄養素</th><th>合計 (g)</th><th>合計 (kcal)</th><th>割合 (%)</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>タンパク質</td><td>-</td><td>-</td><td>-</td></tr>
-          <tr><td>脂質</td><td>-</td><td>-</td><td>-</td></tr>
-          <tr><td>炭水化物</td><td>-</td><td>-</td><td>-</td></tr>
-        </tbody>
-      </table>
-      <button class="copy-btn" onclick="copyResult()">結果をコピー</button>
+    <div id="chartContainer">
+      <canvas id="pfcChart"></canvas>
+      <div id="centerText"></div>
     </div>
   </div>
 
+  <!-- Chart.js本体 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- ChartDataLabelsプラグイン -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
   <script>
-    function saveInputs() {
-      ["totalCal", "protein", "fat", "carb"].forEach(id => {
-        localStorage.setItem(id, document.getElementById(id).value);
-      });
-    }
+    // ChartDataLabelsプラグインを登録
+    Chart.register(ChartDataLabels);
 
-    function loadInputs() {
-      ["totalCal", "protein", "fat", "carb"].forEach(id => {
-        const value = localStorage.getItem(id);
-        if (value !== null) {
-          document.getElementById(id).value = value;
-        }
-      });
-    }
-
-    function updateTotalPercentage() {
-      const protein = parseFloat(document.getElementById("protein").value) || 0;
-      const fat = parseFloat(document.getElementById("fat").value) || 0;
-      const carb = parseFloat(document.getElementById("carb").value) || 0;
-      const total = protein + fat + carb;
-      document.getElementById("totalPercentage").innerText = `合計: ${total.toFixed(1)}%`;
-    }
-
-    ["protein", "fat", "carb"].forEach(id => {
-      document.getElementById(id).addEventListener("input", updateTotalPercentage);
-    });
+    let chartInstance = null;
 
     function calculate() {
-      saveInputs();
       const totalCal = parseFloat(document.getElementById("totalCal").value);
       const proteinRatio = parseFloat(document.getElementById("protein").value);
       const fatRatio = parseFloat(document.getElementById("fat").value);
       const carbRatio = parseFloat(document.getElementById("carb").value);
 
       if (isNaN(totalCal) || isNaN(proteinRatio) || isNaN(fatRatio) || isNaN(carbRatio)) {
-        alert("全ての項目を正しく入力してください");
+        alert("すべての数値を正しく入力してください！");
         return;
       }
 
       const totalRatio = proteinRatio + fatRatio + carbRatio;
       if (Math.round(totalRatio) !== 100) {
-        alert(`P・F・Cの合計が100%ではありません（現在: ${totalRatio.toFixed(1)}%）`);
+        alert(`P・F・Cの合計が100%になっていません（現在: ${totalRatio.toFixed(1)}%）`);
         return;
       }
 
-      const pCal = totalCal * (proteinRatio / 100);
-      const fCal = totalCal * (fatRatio / 100);
-      const cCal = totalCal * (carbRatio / 100);
+      if (chartInstance) chartInstance.destroy();
 
-      const pGram = Math.round(pCal / 4);
-      const fGram = Math.round(fCal / 9);
-      const cGram = Math.round(cCal / 4);
+      const ctx = document.getElementById('pfcChart').getContext('2d');
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['タンパク質', '脂質', '炭水化物'],
+          datasets: [{
+            data: [proteinRatio, fatRatio, carbRatio],
+            backgroundColor: ['#66BB6A', '#FFA726', '#42A5F5'],
+            borderColor: '#fff',
+            borderWidth: 3,
+            hoverOffset: 20
+          }]
+        },
+        options: {
+          responsive: true,
+          cutout: '70%',
+          plugins: {
+            legend: { position: 'bottom' },
+            tooltip: { enabled: true },
+            datalabels: {
+              color: '#fff',
+              font: { weight: 'bold', size: 14 },
+              formatter: (value) => value + '%'
+            }
+          }
+        }
+      });
 
-      document.getElementById("resultContainer").innerHTML = `
-        <h2>結果（1日あたり）</h2>
-        <table>
-          <thead>
-            <tr><th>栄養素</th><th>合計 (g)</th><th>合計 (kcal)</th><th>割合 (%)</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>タンパク質</td><td>${pGram}</td><td>${Math.round(pCal)}</td><td>${proteinRatio}%</td></tr>
-            <tr><td>脂質</td><td>${fGram}</td><td>${Math.round(fCal)}</td><td>${fatRatio}%</td></tr>
-            <tr><td>炭水化物</td><td>${cGram}</td><td>${Math.round(cCal)}</td><td>${carbRatio}%</td></tr>
-          </tbody>
-        </table>
-        <button class="copy-btn" onclick="copyResult()">結果をコピー</button>
+      document.getElementById('centerText').innerHTML = `
+        ${totalCal} kcal<br><small>Total Intake</small>
       `;
     }
-
-    function copyResult() {
-      navigator.clipboard.writeText(document.getElementById("resultContainer").innerText).then(() => {
-        alert("結果をコピーしました！");
-      });
-    }
-
-    window.onload = () => {
-      loadInputs();
-      updateTotalPercentage();
-    };
   </script>
 </body>
 </html>

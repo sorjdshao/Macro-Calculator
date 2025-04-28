@@ -2,12 +2,12 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>PFCバランス計算機（改良版）</title>
+  <title>PFCバランス計算機（保存機能版）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: sans-serif; background: #f5f5f5; padding: 16px; font-size: 16px; }
     .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 800px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    h1, h2 { text-align: center; }
+    h1, h2 { text-align: center; margin-bottom: 20px; }
     label { display: block; margin-top: 16px; font-weight: bold; }
     input, select {
       width: 100%; padding: 12px; margin-top: 8px; font-size: 16px;
@@ -18,6 +18,9 @@
       width: 100%; padding: 14px; margin-top: 20px; font-size: 16px;
       background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer;
     }
+    .copy-btn {
+      background: #2196F3; margin-top: 10px;
+    }
     .result {
       background: #fff; padding: 20px; margin-top: 20px;
       border-radius: 8px; border: 1px solid #ccc;
@@ -25,18 +28,25 @@
     }
     table {
       width: 100%; border-collapse: collapse; margin-top: 20px;
+      table-layout: fixed;
     }
     th, td {
-      border: 1px solid #ccc; padding: 10px; text-align: center;
+      border: 1px solid #ccc; padding: 10px;
+      text-align: center; vertical-align: middle;
+      word-break: break-word;
     }
     th {
-      background-color: #f0f0f0;
+      background-color: #e0e0e0;
+      font-weight: bold;
+    }
+    td {
+      background-color: #fafafa;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>PFCバランス計算機（改良版）</h1>
+    <h1>PFCバランス計算機（保存機能版）</h1>
 
     <label>総摂取カロリー（kcal）</label>
     <input type="number" id="totalCal" placeholder="例: 2000">
@@ -82,11 +92,36 @@
 
     <button onclick="calculate()">計算する</button>
 
-    <div class="result" id="result" style="display:none;"></div>
+    <div id="resultContainer" style="display:none;">
+      <div class="result" id="result"></div>
+      <button class="copy-btn" onclick="copyResult()">結果をコピー</button>
+    </div>
   </div>
 
   <script>
+    // 入力値を保存する
+    function saveInputs() {
+      const inputs = ["totalCal", "protein", "proteinMeals", "fat", "fatMeals", "carb", "carbMeals"];
+      inputs.forEach(id => {
+        const el = document.getElementById(id);
+        localStorage.setItem(id, el.value);
+      });
+    }
+
+    // 入力値を復元する
+    function loadInputs() {
+      const inputs = ["totalCal", "protein", "proteinMeals", "fat", "fatMeals", "carb", "carbMeals"];
+      inputs.forEach(id => {
+        const value = localStorage.getItem(id);
+        if (value !== null) {
+          document.getElementById(id).value = value;
+        }
+      });
+    }
+
     function calculate() {
+      saveInputs(); // 計算ボタン押したときに保存
+
       const totalCal = parseFloat(document.getElementById("totalCal").value);
       const proteinRatio = parseFloat(document.getElementById("protein").value);
       const fatRatio = parseFloat(document.getElementById("fat").value);
@@ -146,8 +181,20 @@
           </tbody>
         </table>
       `;
-      result.style.display = "block";
+      document.getElementById("resultContainer").style.display = "block";
     }
+
+    function copyResult() {
+      const resultText = document.getElementById("result").innerText;
+      navigator.clipboard.writeText(resultText).then(() => {
+        alert("結果をコピーしました！");
+      }).catch(err => {
+        alert("コピーに失敗しました");
+      });
+    }
+
+    // ページ読み込み時に保存データを復元
+    window.onload = loadInputs;
   </script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>PFCバランス計算機（保存機能版）</title>
+  <title>PFCバランス計算機（グラフ付き）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: sans-serif; background: #f5f5f5; padding: 16px; font-size: 16px; }
@@ -42,11 +42,19 @@
     td {
       background-color: #fafafa;
     }
+    #chartContainer {
+      margin-top: 30px;
+      text-align: center;
+    }
+    canvas {
+      max-width: 400px;
+      margin: auto;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>PFCバランス計算機（保存機能版）</h1>
+    <h1>PFCバランス計算機（グラフ付き）</h1>
 
     <label>総摂取カロリー（kcal）</label>
     <input type="number" id="totalCal" placeholder="例: 2000">
@@ -96,10 +104,19 @@
       <div class="result" id="result"></div>
       <button class="copy-btn" onclick="copyResult()">結果をコピー</button>
     </div>
+
+    <div id="chartContainer" style="display:none;">
+      <h2>バランスグラフ</h2>
+      <canvas id="pfcChart"></canvas>
+    </div>
   </div>
 
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <script>
-    // 入力値を保存する
+    let chartInstance = null; // グラフを一度だけ作成
+
     function saveInputs() {
       const inputs = ["totalCal", "protein", "proteinMeals", "fat", "fatMeals", "carb", "carbMeals"];
       inputs.forEach(id => {
@@ -108,7 +125,6 @@
       });
     }
 
-    // 入力値を復元する
     function loadInputs() {
       const inputs = ["totalCal", "protein", "proteinMeals", "fat", "fatMeals", "carb", "carbMeals"];
       inputs.forEach(id => {
@@ -120,7 +136,7 @@
     }
 
     function calculate() {
-      saveInputs(); // 計算ボタン押したときに保存
+      saveInputs();
 
       const totalCal = parseFloat(document.getElementById("totalCal").value);
       const proteinRatio = parseFloat(document.getElementById("protein").value);
@@ -167,8 +183,7 @@
       const fPerMeal = Math.round(fGram / fatMeals);
       const cPerMeal = Math.round(cGram / carbMeals);
 
-      const result = document.getElementById("result");
-      result.innerHTML = `
+      document.getElementById("result").innerHTML = `
         <h2>結果（1日あたり）</h2>
         <table>
           <thead>
@@ -182,6 +197,29 @@
         </table>
       `;
       document.getElementById("resultContainer").style.display = "block";
+
+      // グラフ作成
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+      const ctx = document.getElementById('pfcChart').getContext('2d');
+      chartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['タンパク質', '脂質', '炭水化物'],
+          datasets: [{
+            data: [proteinRatio, fatRatio, carbRatio],
+            backgroundColor: ['#4CAF50', '#FF9800', '#2196F3'],
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+      document.getElementById("chartContainer").style.display = "block";
     }
 
     function copyResult() {
@@ -193,7 +231,6 @@
       });
     }
 
-    // ページ読み込み時に保存データを復元
     window.onload = loadInputs;
   </script>
 </body>

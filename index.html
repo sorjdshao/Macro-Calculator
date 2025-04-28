@@ -170,6 +170,11 @@
       saveInputs();
 
       const totalCal = parseFloat(document.getElementById("totalCal").value);
+      if (isNaN(totalCal) || totalCal <= 0) {
+        alert("総摂取カロリーを正しく入力してください");
+        return;
+      }
+
       const proteinRatio = parseFloat(document.getElementById("protein").value);
       const fatRatio = parseFloat(document.getElementById("fat").value);
       const carbRatio = parseFloat(document.getElementById("carb").value);
@@ -256,6 +261,7 @@
         },
         plugins: [centerTextPlugin]
       });
+
       document.getElementById("chartContainer").style.display = "block";
     }
 

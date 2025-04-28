@@ -32,7 +32,7 @@
       font-weight: bold;
       color: #555;
     }
-    input, select {
+    input {
       width: 100%;
       padding: 12px;
       margin-top: 8px;
@@ -67,6 +67,12 @@
     .copy-btn:hover {
       background: #1976D2;
     }
+    .total-percentage {
+      text-align: center;
+      font-weight: bold;
+      color: #555;
+      margin-top: 10px;
+    }
     .result {
       background: #fff;
       padding: 20px;
@@ -74,13 +80,12 @@
       border-radius: 8px;
       border: 1px solid #ccc;
       font-size: 16px;
-      line-height: 1.6;
       overflow-x: auto;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
+      margin-top: 10px;
     }
     th, td {
       border: 1px solid #ccc;
@@ -91,38 +96,6 @@
     th {
       background: #eeeeee;
       font-weight: bold;
-    }
-    #chartContainer {
-      margin-top: 30px;
-      text-align: center;
-    }
-    .chart-wrapper {
-      position: relative;
-      height: 400px;
-      max-width: 400px;
-      margin: auto;
-    }
-    #pfcChart {
-      width: 100%;
-      height: 100%;
-    }
-    .center-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-weight: 700;
-      font-size: 1.5em;
-      color: #333;
-      pointer-events: none;
-      text-align: center;
-      line-height: 1.2;
-    }
-    .center-text small {
-      display: block;
-      font-weight: 400;
-      font-size: 0.6em;
-      color: #777;
     }
   </style>
 </head>
@@ -142,27 +115,27 @@
     <label>炭水化物の割合（%）</label>
     <input type="number" id="carb" placeholder="例: 50">
 
-    <button onclick="calculate()">計算する</button>
+    <div class="total-percentage" id="totalPercentage">合計: 0%</div>
 
-    <div id="resultContainer" style="display:none;">
-      <div class="result" id="result"></div>
+    <button onclick="calculate()">再計算する</button>
+
+    <div id="resultContainer" class="result">
+      <h2>結果（1日あたり）</h2>
+      <table>
+        <thead>
+          <tr><th>栄養素</th><th>合計 (g)</th><th>合計 (kcal)</th><th>割合 (%)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>タンパク質</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td>脂質</td><td>-</td><td>-</td><td>-</td></tr>
+          <tr><td>炭水化物</td><td>-</td><td>-</td><td>-</td></tr>
+        </tbody>
+      </table>
       <button class="copy-btn" onclick="copyResult()">結果をコピー</button>
-    </div>
-
-    <div id="chartContainer" style="display:none;">
-      <h2>バランスグラフ</h2>
-      <div class="chart-wrapper">
-        <canvas id="pfcChart"></canvas>
-        <div id="centerText" class="center-text"></div>
-      </div>
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
   <script>
-    let chartInstance = null;
-
     function saveInputs() {
       ["totalCal", "protein", "fat", "carb"].forEach(id => {
         localStorage.setItem(id, document.getElementById(id).value);
@@ -177,6 +150,18 @@
         }
       });
     }
+
+    function updateTotalPercentage() {
+      const protein = parseFloat(document.getElementById("protein").value) || 0;
+      const fat = parseFloat(document.getElementById("fat").value) || 0;
+      const carb = parseFloat(document.getElementById("carb").value) || 0;
+      const total = protein + fat + carb;
+      document.getElementById("totalPercentage").innerText = `合計: ${total.toFixed(1)}%`;
+    }
+
+    ["protein", "fat", "carb"].forEach(id => {
+      document.getElementById(id).addEventListener("input", updateTotalPercentage);
+    });
 
     function calculate() {
       saveInputs();
@@ -204,62 +189,32 @@
       const fGram = Math.round(fCal / 9);
       const cGram = Math.round(cCal / 4);
 
-      document.getElementById("result").innerHTML = `
+      document.getElementById("resultContainer").innerHTML = `
         <h2>結果（1日あたり）</h2>
         <table>
           <thead>
-            <tr><th>栄養素</th><th>合計 (g)</th><th>合計 (kcal)</th></tr>
+            <tr><th>栄養素</th><th>合計 (g)</th><th>合計 (kcal)</th><th>割合 (%)</th></tr>
           </thead>
           <tbody>
-            <tr><td>タンパク質</td><td>${pGram}</td><td>${Math.round(pCal)}</td></tr>
-            <tr><td>脂質</td><td>${fGram}</td><td>${Math.round(fCal)}</td></tr>
-            <tr><td>炭水化物</td><td>${cGram}</td><td>${Math.round(cCal)}</td></tr>
+            <tr><td>タンパク質</td><td>${pGram}</td><td>${Math.round(pCal)}</td><td>${proteinRatio}%</td></tr>
+            <tr><td>脂質</td><td>${fGram}</td><td>${Math.round(fCal)}</td><td>${fatRatio}%</td></tr>
+            <tr><td>炭水化物</td><td>${cGram}</td><td>${Math.round(cCal)}</td><td>${carbRatio}%</td></tr>
           </tbody>
         </table>
+        <button class="copy-btn" onclick="copyResult()">結果をコピー</button>
       `;
-      document.getElementById("resultContainer").style.display = "block";
-
-      if (chartInstance) chartInstance.destroy();
-      const ctx = document.getElementById('pfcChart').getContext('2d');
-      chartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['タンパク質', '脂質', '炭水化物'],
-          datasets: [{
-            data: [proteinRatio, fatRatio, carbRatio],
-            backgroundColor: ['#66BB6A', '#FFA726', '#42A5F5'],
-            borderColor: '#fff',
-            borderWidth: 3,
-            hoverOffset: 20
-          }]
-        },
-        options: {
-          responsive: true,
-          cutout: '70%',
-          animation: {
-            animateScale: true,
-            duration: 1500,
-            easing: 'easeOutBounce'
-          },
-          plugins: {
-            legend: { position: 'bottom' },
-            tooltip: { enabled: true }
-          }
-        }
-      });
-      document.getElementById("chartContainer").style.display = "block";
-
-      // 中央テキスト更新
-      document.getElementById('centerText').innerHTML = `${totalCal} kcal<small>Total Intake</small>`;
     }
 
     function copyResult() {
-      navigator.clipboard.writeText(document.getElementById("result").innerText).then(() => {
+      navigator.clipboard.writeText(document.getElementById("resultContainer").innerText).then(() => {
         alert("結果をコピーしました！");
       });
     }
 
-    window.onload = loadInputs;
+    window.onload = () => {
+      loadInputs();
+      updateTotalPercentage();
+    };
   </script>
 </body>
 </html>

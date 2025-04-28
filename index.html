@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>PFCバランス計算機（プロ版 完全版）</title>
+  <title>PFCバランス計算機（プロ版・完全版）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
   <style>
@@ -32,7 +32,7 @@
       font-weight: bold;
       color: #555;
     }
-    input {
+    input, select {
       width: 100%;
       padding: 12px;
       margin-top: 8px;
@@ -80,23 +80,64 @@
       font-size: 0.7em;
       color: #777;
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+      text-align: center;
+      background: #fafafa;
+    }
+    th {
+      background: #eeeeee;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>PFCバランス計算機（プロ版 完全版）</h1>
+    <h1>PFCバランス計算機（プロ版・完全版）</h1>
 
     <label>総摂取カロリー（kcal）</label>
     <input type="number" id="totalCal" placeholder="例: 2000">
 
     <label>タンパク質の割合（%）</label>
     <input type="number" id="protein" placeholder="例: 30">
+    <label>タンパク質の食事回数</label>
+    <select id="proteinMeals">
+      <option value="1">1回</option>
+      <option value="2">2回</option>
+      <option value="3" selected>3回</option>
+      <option value="4">4回</option>
+      <option value="5">5回</option>
+      <option value="6">6回</option>
+    </select>
 
     <label>脂質の割合（%）</label>
     <input type="number" id="fat" placeholder="例: 20">
+    <label>脂質の食事回数</label>
+    <select id="fatMeals">
+      <option value="1">1回</option>
+      <option value="2">2回</option>
+      <option value="3" selected>3回</option>
+      <option value="4">4回</option>
+      <option value="5">5回</option>
+      <option value="6">6回</option>
+    </select>
 
     <label>炭水化物の割合（%）</label>
     <input type="number" id="carb" placeholder="例: 50">
+    <label>炭水化物の食事回数</label>
+    <select id="carbMeals">
+      <option value="1">1回</option>
+      <option value="2">2回</option>
+      <option value="3" selected>3回</option>
+      <option value="4">4回</option>
+      <option value="5">5回</option>
+      <option value="6">6回</option>
+    </select>
 
     <button onclick="calculate()">再計算する</button>
 
@@ -104,24 +145,46 @@
       <canvas id="pfcChart"></canvas>
       <div id="centerText"></div>
     </div>
+
+    <div id="resultContainer"></div>
   </div>
 
-  <!-- Chart.js本体 -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <!-- ChartDataLabelsプラグイン -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
   <script>
-    // ChartDataLabelsプラグインを登録
     Chart.register(ChartDataLabels);
 
     let chartInstance = null;
 
+    function saveInputs() {
+      ["totalCal", "protein", "proteinMeals", "fat", "fatMeals", "carb", "carbMeals"].forEach(id => {
+        localStorage.setItem(id, document.getElementById(id).value);
+      });
+    }
+
+    function loadInputs() {
+      ["totalCal", "protein", "proteinMeals", "fat", "fatMeals", "carb", "carbMeals"].forEach(id => {
+        const value = localStorage.getItem(id);
+        if (value !== null) {
+          document.getElementById(id).value = value;
+        }
+      });
+    }
+
+    window.onload = loadInputs;
+
     function calculate() {
+      saveInputs();
+
       const totalCal = parseFloat(document.getElementById("totalCal").value);
       const proteinRatio = parseFloat(document.getElementById("protein").value);
       const fatRatio = parseFloat(document.getElementById("fat").value);
       const carbRatio = parseFloat(document.getElementById("carb").value);
+
+      const proteinMeals = parseInt(document.getElementById("proteinMeals").value);
+      const fatMeals = parseInt(document.getElementById("fatMeals").value);
+      const carbMeals = parseInt(document.getElementById("carbMeals").value);
 
       if (isNaN(totalCal) || isNaN(proteinRatio) || isNaN(fatRatio) || isNaN(carbRatio)) {
         alert("すべての数値を正しく入力してください！");
@@ -134,8 +197,33 @@
         return;
       }
 
-      if (chartInstance) chartInstance.destroy();
+      const pCal = totalCal * (proteinRatio / 100);
+      const fCal = totalCal * (fatRatio / 100);
+      const cCal = totalCal * (carbRatio / 100);
 
+      const pGram = Math.round(pCal / 4);
+      const fGram = Math.round(fCal / 9);
+      const cGram = Math.round(cCal / 4);
+
+      const pPerMeal = Math.round(pGram / proteinMeals);
+      const fPerMeal = Math.round(fGram / fatMeals);
+      const cPerMeal = Math.round(cGram / carbMeals);
+
+      document.getElementById("resultContainer").innerHTML = `
+        <h2>結果（1日あたり）</h2>
+        <table>
+          <thead>
+            <tr><th>栄養素</th><th>合計 (g)</th><th>合計 (kcal)</th><th>食事回数</th><th>1食あたり (g)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>タンパク質</td><td>${pGram}</td><td>${Math.round(pCal)}</td><td>${proteinMeals}</td><td>${pPerMeal}</td></tr>
+            <tr><td>脂質</td><td>${fGram}</td><td>${Math.round(fCal)}</td><td>${fatMeals}</td><td>${fPerMeal}</td></tr>
+            <tr><td>炭水化物</td><td>${cGram}</td><td>${Math.round(cCal)}</td><td>${carbMeals}</td><td>${cPerMeal}</td></tr>
+          </tbody>
+        </table>
+      `;
+
+      if (chartInstance) chartInstance.destroy();
       const ctx = document.getElementById('pfcChart').getContext('2d');
       chartInstance = new Chart(ctx, {
         type: 'doughnut',

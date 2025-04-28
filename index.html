@@ -2,53 +2,41 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>PFCバランス計算機</title>
+  <title>PFCバランス計算機（改良版）</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: sans-serif; background: #f5f5f5; padding: 16px; font-size: 16px; }
-    .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 100%; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 800px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1, h2 { text-align: center; }
     label { display: block; margin-top: 16px; font-weight: bold; }
-    input, select, button {
-      width: 100%; padding: 14px; margin-top: 8px; font-size: 16px;
-      border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box;
+    input, select {
+      width: 100%; padding: 12px; margin-top: 8px; font-size: 16px;
+      border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
     }
     input.error { border: 2px solid red; }
     button {
-      background: #4CAF50; color: white; border: none; margin-top: 16px; cursor: pointer;
+      width: 100%; padding: 14px; margin-top: 20px; font-size: 16px;
+      background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer;
     }
     .result {
-      background: #eaffea; padding: 16px; margin-top: 20px;
-      border-radius: 6px; border-left: 5px solid #4CAF50; font-size: 16px; line-height: 1.6; overflow-x: auto;
+      background: #fff; padding: 20px; margin-top: 20px;
+      border-radius: 8px; border: 1px solid #ccc;
+      font-size: 16px; line-height: 1.6; overflow-x: auto;
     }
-    .guide {
-      margin-top: 24px;
+    table {
+      width: 100%; border-collapse: collapse; margin-top: 20px;
     }
-    .diet-card {
-      background: #f9f9f9;
-      padding: 12px;
-      margin-top: 10px;
-      border-left: 5px solid #4CAF50;
-      border-radius: 6px;
+    th, td {
+      border: 1px solid #ccc; padding: 10px; text-align: center;
     }
-    .diet-card span {
-      display: block;
-      margin-top: 4px;
-      font-weight: bold;
-    }
-    .diet-card.vlcd {
-      background: #fff0f0;
-      border-left-color: #e53935;
-    }
-    .diet-card .warning {
-      color: red;
-      font-weight: bold;
-      margin-top: 6px;
+    th {
+      background-color: #f0f0f0;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>PFCバランス計算機</h1>
+    <h1>PFCバランス計算機（改良版）</h1>
 
     <label>総摂取カロリー（kcal）</label>
     <input type="number" id="totalCal" placeholder="例: 2000">
@@ -56,14 +44,34 @@
     <label>タンパク質の割合（%）</label>
     <input type="number" id="protein" placeholder="例: 30">
 
+    <label>タンパク質の食事回数</label>
+    <select id="proteinMeals">
+      <option value="1">1回</option>
+      <option value="2">2回</option>
+      <option value="3" selected>3回</option>
+      <option value="4">4回</option>
+      <option value="5">5回</option>
+      <option value="6">6回</option>
+    </select>
+
     <label>脂質の割合（%）</label>
     <input type="number" id="fat" placeholder="例: 20">
+
+    <label>脂質の食事回数</label>
+    <select id="fatMeals">
+      <option value="1">1回</option>
+      <option value="2">2回</option>
+      <option value="3" selected>3回</option>
+      <option value="4">4回</option>
+      <option value="5">5回</option>
+      <option value="6">6回</option>
+    </select>
 
     <label>炭水化物の割合（%）</label>
     <input type="number" id="carb" placeholder="例: 50">
 
-    <label>1日の食事回数</label>
-    <select id="meals">
+    <label>炭水化物の食事回数</label>
+    <select id="carbMeals">
       <option value="1">1回</option>
       <option value="2">2回</option>
       <option value="3" selected>3回</option>
@@ -75,36 +83,6 @@
     <button onclick="calculate()">計算する</button>
 
     <div class="result" id="result" style="display:none;"></div>
-
-    <div class="guide">
-      <h2>PFCバランスの参考（ダイエット方針別）</h2>
-      <p>代表的なダイエット方針ごとのPFCバランスの目安です。</p>
-
-      <div class="diet-card">
-        <strong>Low Fat（脂質制限）</strong><br>
-        脂質を抑えて炭水化物を中心に摂る<br>
-        <span>P: 25〜35% / F: 10〜20% / C: 45〜60%</span>
-      </div>
-
-      <div class="diet-card">
-        <strong>Low Carb（炭水化物制限）</strong><br>
-        炭水化物を抑えて脂質を活用する<br>
-        <span>P: 30〜40% / F: 25〜35% / C: 20〜30%</span>
-      </div>
-
-      <div class="diet-card">
-        <strong>VLC（Very Low Carb）</strong><br>
-        極端に炭水化物を減らし、脂質中心（ケト系）<br>
-        <span>P: 30〜35% / F: 55〜65% / C: 5〜10%</span>
-      </div>
-
-      <div class="diet-card vlcd">
-        <strong>VLCD（Very Low Calorie Diet）</strong><br>
-        医療向けの超低カロリー（800kcal未満）<br>
-        <span>P: 30〜40% / F: 20〜30% / C: 30〜40%</span><br>
-        <span class="warning">※ 医療管理下以外では行わないでください</span>
-      </div>
-    </div>
   </div>
 
   <script>
@@ -113,7 +91,10 @@
       const proteinRatio = parseFloat(document.getElementById("protein").value);
       const fatRatio = parseFloat(document.getElementById("fat").value);
       const carbRatio = parseFloat(document.getElementById("carb").value);
-      const meals = parseInt(document.getElementById("meals").value);
+
+      const proteinMeals = parseInt(document.getElementById("proteinMeals").value);
+      const fatMeals = parseInt(document.getElementById("fatMeals").value);
+      const carbMeals = parseInt(document.getElementById("carbMeals").value);
 
       const inputs = ["totalCal", "protein", "fat", "carb"];
       let hasError = false;
@@ -147,25 +128,23 @@
       const fGram = Math.round(fCal / 9);
       const cGram = Math.round(cCal / 4);
 
-      const pPerMeal = Math.round(pGram / meals);
-      const fPerMeal = Math.round(fGram / meals);
-      const cPerMeal = Math.round(cGram / meals);
-      const calPerMeal = Math.round(totalCal / meals);
+      const pPerMeal = Math.round(pGram / proteinMeals);
+      const fPerMeal = Math.round(fGram / fatMeals);
+      const cPerMeal = Math.round(cGram / carbMeals);
 
       const result = document.getElementById("result");
       result.innerHTML = `
-        <h2>1日の食事の目安</h2>
+        <h2>結果（1日あたり）</h2>
         <table>
           <thead>
-            <tr><th>栄養素</th><th>合計 (g)</th><th>kcal</th><th>1食あたり (g)</th></tr>
+            <tr><th>栄養素</th><th>合計 (g)</th><th>合計 (kcal)</th><th>食事回数</th><th>1食あたり (g)</th></tr>
           </thead>
           <tbody>
-            <tr><td>タンパク質</td><td>${pGram}</td><td>${Math.round(pCal)}</td><td>${pPerMeal}</td></tr>
-            <tr><td>脂質</td><td>${fGram}</td><td>${Math.round(fCal)}</td><td>${fPerMeal}</td></tr>
-            <tr><td>炭水化物</td><td>${cGram}</td><td>${Math.round(cCal)}</td><td>${cPerMeal}</td></tr>
+            <tr><td>タンパク質</td><td>${pGram}</td><td>${Math.round(pCal)}</td><td>${proteinMeals}</td><td>${pPerMeal}</td></tr>
+            <tr><td>脂質</td><td>${fGram}</td><td>${Math.round(fCal)}</td><td>${fatMeals}</td><td>${fPerMeal}</td></tr>
+            <tr><td>炭水化物</td><td>${cGram}</td><td>${Math.round(cCal)}</td><td>${carbMeals}</td><td>${cPerMeal}</td></tr>
           </tbody>
         </table>
-        <p><strong>1食あたりの合計カロリー:</strong> ${calPerMeal} kcal</p>
       `;
       result.style.display = "block";
     }

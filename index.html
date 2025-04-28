@@ -1,47 +1,96 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <title>PFCバランス計算機（グラフ付き）</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet"> <!-- Google Fonts -->
+  <meta charset="UTF-8">
+  <title>PFCバランス計算機</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Poppins', sans-serif; background: #f5f5f5; padding: 16px; font-size: 16px; }
-    .container { background: #fff; padding: 20px; border-radius: 10px; max-width: 800px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    h1, h2 { text-align: center; margin-bottom: 20px; }
-    label { display: block; margin-top: 16px; font-weight: bold; }
-    input, select {
-      width: 100%; padding: 12px; margin-top: 8px; font-size: 16px;
-      border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      font-size: 16px;
     }
-    input.error { border: 2px solid red; }
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 800px;
+      margin: auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: #333;
+    }
+    label {
+      display: block;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #555;
+    }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+      transition: border-color 0.3s;
+    }
+    input.error {
+      border-color: #f44336;
+    }
     button {
-      width: 100%; padding: 14px; margin-top: 20px; font-size: 16px;
-      background: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer;
+      width: 100%;
+      padding: 14px;
+      margin-top: 25px;
+      font-size: 16px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #45a049;
     }
     .copy-btn {
-      background: #2196F3; margin-top: 10px;
+      background: #2196F3;
+      margin-top: 10px;
+    }
+    .copy-btn:hover {
+      background: #1976D2;
     }
     .result {
-      background: #fff; padding: 20px; margin-top: 20px;
-      border-radius: 8px; border: 1px solid #ccc;
-      font-size: 16px; line-height: 1.6; overflow-x: auto;
+      background: #fff;
+      padding: 20px;
+      margin-top: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: auto;
     }
     table {
-      width: 100%; border-collapse: collapse; margin-top: 20px;
-      table-layout: fixed;
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
     }
     th, td {
-      border: 1px solid #ccc; padding: 10px;
-      text-align: center; vertical-align: middle;
-      word-break: break-word;
+      border: 1px solid #ccc;
+      padding: 12px;
+      text-align: center;
+      background: #fafafa;
     }
     th {
-      background-color: #e0e0e0;
+      background: #eeeeee;
       font-weight: bold;
-    }
-    td {
-      background-color: #fafafa;
     }
     #chartContainer {
       margin-top: 30px;
@@ -55,7 +104,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>PFCバランス計算機（グラフ付き）</h1>
+    <h1>PFCバランス計算機</h1>
 
     <label>総摂取カロリー（kcal）</label>
     <input type="number" id="totalCal" placeholder="例: 2000">
@@ -63,41 +112,11 @@
     <label>タンパク質の割合（%）</label>
     <input type="number" id="protein" placeholder="例: 30">
 
-    <label>タンパク質の食事回数</label>
-    <select id="proteinMeals">
-      <option value="1">1回</option>
-      <option value="2">2回</option>
-      <option value="3" selected>3回</option>
-      <option value="4">4回</option>
-      <option value="5">5回</option>
-      <option value="6">6回</option>
-    </select>
-
     <label>脂質の割合（%）</label>
     <input type="number" id="fat" placeholder="例: 20">
 
-    <label>脂質の食事回数</label>
-    <select id="fatMeals">
-      <option value="1">1回</option>
-      <option value="2">2回</option>
-      <option value="3" selected>3回</option>
-      <option value="4">4回</option>
-      <option value="5">5回</option>
-      <option value="6">6回</option>
-    </select>
-
     <label>炭水化物の割合（%）</label>
     <input type="number" id="carb" placeholder="例: 50">
-
-    <label>炭水化物の食事回数</label>
-    <select id="carbMeals">
-      <option value="1">1回</option>
-      <option value="2">2回</option>
-      <option value="3" selected>3回</option>
-      <option value="4">4回</option>
-      <option value="5">5回</option>
-      <option value="6">6回</option>
-    </select>
 
     <button onclick="calculate()">計算する</button>
 
@@ -112,23 +131,44 @@
     </div>
   </div>
 
-  <!-- Chart.js CDN -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
   <script>
-    let chartInstance = null; // グラフを一度だけ作成
+    let chartInstance = null;
+    let totalCal = 0;
+
+    const centerTextPlugin = {
+      id: 'centerText',
+      beforeDraw(chart) {
+        const { width, height } = chart;
+        const ctx = chart.ctx;
+        ctx.save();
+        const fontSizeMain = (height / 150).toFixed(2);
+        ctx.font = `700 ${fontSizeMain}em 'Poppins', sans-serif`;
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#333';
+        const text = `${totalCal} kcal`;
+        const textX = (width - ctx.measureText(text).width) / 2;
+        const textY = height / 2 - 10;
+        ctx.fillText(text, textX, textY);
+        ctx.font = `400 ${(height/250).toFixed(2)}em 'Poppins', sans-serif`;
+        ctx.fillStyle = '#777';
+        const subText = 'Total Intake';
+        const subTextX = (width - ctx.measureText(subText).width) / 2;
+        const subTextY = height / 2 + 20;
+        ctx.fillText(subText, subTextX, subTextY);
+        ctx.restore();
+      }
+    };
 
     function saveInputs() {
-      const inputs = ["totalCal", "protein", "proteinMeals", "fat", "fatMeals", "carb", "carbMeals"];
-      inputs.forEach(id => {
-        const el = document.getElementById(id);
-        localStorage.setItem(id, el.value);
+      ["totalCal", "protein", "fat", "carb"].forEach(id => {
+        localStorage.setItem(id, document.getElementById(id).value);
       });
     }
 
     function loadInputs() {
-      const inputs = ["totalCal", "protein", "proteinMeals", "fat", "fatMeals", "carb", "carbMeals"];
-      inputs.forEach(id => {
+      ["totalCal", "protein", "fat", "carb"].forEach(id => {
         const value = localStorage.getItem(id);
         if (value !== null) {
           document.getElementById(id).value = value;
@@ -136,74 +176,21 @@
       });
     }
 
-    // 中央テキスト描画のカスタムプラグイン
-    const centerTextPlugin = {
-      id: 'centerText',
-      beforeDraw(chart) {
-        const { width, height } = chart;
-        const ctx = chart.ctx;
-        ctx.restore();
-
-        const fontSizeMain = (height / 140).toFixed(2);
-        ctx.font = `700 ${fontSizeMain}em 'Poppins', sans-serif`;
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#333';
-
-        const text = `${totalCal} kcal`;
-        const textX = (width - ctx.measureText(text).width) / 2;
-        const textY = height / 2 - 10;
-        ctx.fillText(text, textX, textY);
-
-        const fontSizeSub = (height / 220).toFixed(2);
-        ctx.font = `400 ${fontSizeSub}em 'Poppins', sans-serif`;
-        ctx.fillStyle = '#777';
-        const subText = 'Total Intake';
-        const subTextX = (width - ctx.measureText(subText).width) / 2;
-        const subTextY = height / 2 + 20;
-        ctx.fillText(subText, subTextX, subTextY);
-
-        ctx.save();
-      }
-    };
-
     function calculate() {
       saveInputs();
-
-      const totalCal = parseFloat(document.getElementById("totalCal").value);
-      if (isNaN(totalCal) || totalCal <= 0) {
-        alert("総摂取カロリーを正しく入力してください");
-        return;
-      }
-
+      totalCal = parseFloat(document.getElementById("totalCal").value);
       const proteinRatio = parseFloat(document.getElementById("protein").value);
       const fatRatio = parseFloat(document.getElementById("fat").value);
       const carbRatio = parseFloat(document.getElementById("carb").value);
 
-      const proteinMeals = parseInt(document.getElementById("proteinMeals").value);
-      const fatMeals = parseInt(document.getElementById("fatMeals").value);
-      const carbMeals = parseInt(document.getElementById("carbMeals").value);
-
-      const inputs = ["totalCal", "protein", "fat", "carb"];
-      let hasError = false;
-
-      inputs.forEach(id => {
-        const el = document.getElementById(id);
-        el.classList.remove("error");
-        if (!el.value || isNaN(parseFloat(el.value))) {
-          el.classList.add("error");
-          hasError = true;
-        }
-      });
-
-      if (hasError) {
-        alert("すべての値を正しく入力してください");
+      if (isNaN(totalCal) || isNaN(proteinRatio) || isNaN(fatRatio) || isNaN(carbRatio)) {
+        alert("全ての項目を正しく入力してください");
         return;
       }
 
       const totalRatio = proteinRatio + fatRatio + carbRatio;
       if (Math.round(totalRatio) !== 100) {
-        ["protein", "fat", "carb"].forEach(id => document.getElementById(id).classList.add("error"));
-        alert("P・F・Cの合計が100%になるように入力してください（現在: " + totalRatio.toFixed(1) + "%）");
+        alert(`P・F・Cの合計が100%ではありません（現在: ${totalRatio.toFixed(1)}%）`);
         return;
       }
 
@@ -215,29 +202,22 @@
       const fGram = Math.round(fCal / 9);
       const cGram = Math.round(cCal / 4);
 
-      const pPerMeal = Math.round(pGram / proteinMeals);
-      const fPerMeal = Math.round(fGram / fatMeals);
-      const cPerMeal = Math.round(cGram / carbMeals);
-
       document.getElementById("result").innerHTML = `
         <h2>結果（1日あたり）</h2>
         <table>
           <thead>
-            <tr><th>栄養素</th><th>合計 (g)</th><th>合計 (kcal)</th><th>食事回数</th><th>1食あたり (g)</th></tr>
+            <tr><th>栄養素</th><th>合計 (g)</th><th>合計 (kcal)</th></tr>
           </thead>
           <tbody>
-            <tr><td>タンパク質</td><td>${pGram}</td><td>${Math.round(pCal)}</td><td>${proteinMeals}</td><td>${pPerMeal}</td></tr>
-            <tr><td>脂質</td><td>${fGram}</td><td>${Math.round(fCal)}</td><td>${fatMeals}</td><td>${fPerMeal}</td></tr>
-            <tr><td>炭水化物</td><td>${cGram}</td><td>${Math.round(cCal)}</td><td>${carbMeals}</td><td>${cPerMeal}</td></tr>
+            <tr><td>タンパク質</td><td>${pGram}</td><td>${Math.round(pCal)}</td></tr>
+            <tr><td>脂質</td><td>${fGram}</td><td>${Math.round(fCal)}</td></tr>
+            <tr><td>炭水化物</td><td>${cGram}</td><td>${Math.round(cCal)}</td></tr>
           </tbody>
         </table>
       `;
       document.getElementById("resultContainer").style.display = "block";
 
-      // グラフ作成
-      if (chartInstance) {
-        chartInstance.destroy();
-      }
+      if (chartInstance) chartInstance.destroy();
       const ctx = document.getElementById('pfcChart').getContext('2d');
       chartInstance = new Chart(ctx, {
         type: 'doughnut',
@@ -245,15 +225,20 @@
           labels: ['タンパク質', '脂質', '炭水化物'],
           datasets: [{
             data: [proteinRatio, fatRatio, carbRatio],
-            backgroundColor: ['#4CAF50', '#FF9800', '#2196F3'],
-            hoverOffset: 30,
+            backgroundColor: ['#66BB6A', '#FFA726', '#42A5F5'],
+            borderColor: '#fff',
             borderWidth: 3,
-            borderColor: '#fff'
+            hoverOffset: 20
           }]
         },
         options: {
           responsive: true,
-          cutout: '70%', // 真ん中の空き部分を大きめに
+          cutout: '70%',
+          animation: {
+            animateScale: true,
+            duration: 1500,
+            easing: 'easeOutBounce'
+          },
           plugins: {
             legend: { position: 'bottom' },
             tooltip: { enabled: true }
@@ -261,16 +246,12 @@
         },
         plugins: [centerTextPlugin]
       });
-
       document.getElementById("chartContainer").style.display = "block";
     }
 
     function copyResult() {
-      const resultText = document.getElementById("result").innerText;
-      navigator.clipboard.writeText(resultText).then(() => {
+      navigator.clipboard.writeText(document.getElementById("result").innerText).then(() => {
         alert("結果をコピーしました！");
-      }).catch(err => {
-        alert("コピーに失敗しました");
       });
     }
 
